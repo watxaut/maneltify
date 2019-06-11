@@ -38,3 +38,13 @@ though.
 ### Backgrounds
 You can put any background as long as it contains faces. Preferably png (as they will get 
 converted to png if not) and with faces facing the image to get the best results.
+
+## Examples
+### face
+![This is a face](resources/screenshots/example_face.png)
+
+### backgroung IN
+![This is a face](resources/screenshots/example_in.png)
+
+### Montage out
+![This is a face](resources/screenshots/example_out.jpeg)
