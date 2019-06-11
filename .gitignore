@@ -7,9 +7,4 @@ __pycache__/
 *.py[cod]
 *$py.class
 
-*.png
-*.jpeg
-*.jpg
-
-
 venv/
