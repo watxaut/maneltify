@@ -14,6 +14,9 @@ if __name__ == '__main__':
     logger.info('--- Loading faces ---')
     gimp.l_faces = gimp.load_face_params()
 
+    logger.info('--- Loading backgrounds ---')
+    gimp.l_backgrounds = gimp.load_background_params()
+
     # telegram bot init
     updater = Updater(token=token)
     dispatcher = updater.dispatcher

@@ -48,15 +48,7 @@ def lucky(bot, update):
 def montage(bot, update):
     logger.info('He recibido un comando tothemoon')
 
-    s_back_path = "resources/in/backgrounds"
-    l_img_path = []
-
-    # get rid of md file and everything you don't want
-    for s_file in os.listdir(s_back_path):
-        if not s_file.endswith(".md"):
-            l_img_path.append(s_file)
-
-    s_back_img_path = "{}/{}".format(s_back_path, l_img_path[random.randint(0, len(l_img_path) - 1)])
+    background_img_params = gimp.l_backgrounds[random.randint(0, len(gimp.l_backgrounds) - 1)]
 
     s_request = update.message.text.strip()
     if "onlyface" in s_request:
@@ -64,7 +56,7 @@ def montage(bot, update):
     else:
         only_face = False
 
-    img_bytes_io = create_montage(s_back_img_path, only_face)
+    img_bytes_io = create_montage(background_img_params, only_face)
     if img_bytes_io is None:
         bot.send_message(
             chat_id=update.message.chat_id,
@@ -74,15 +66,15 @@ def montage(bot, update):
         bot.send_photo(update.message.chat_id, photo=img_bytes_io)
 
 
-def create_montage(img_background_path, only_face=False):
+def create_montage(background_img, only_face=False):
 
     img_bytes_io = BytesIO()
     img_bytes_io.name = 'montageohlala.jpeg'
 
     try:
-        im_out = gimp.adritify(img_background_path, gimp.l_faces, only_face)
+        im_out = gimp.adritify(background_img, gimp.l_faces, only_face)
     except:  # something wrong with the image jej
-        logger.error('Something wrong with image: "{}"'.format(img_background_path))
+        logger.error('Something wrong with image: "{}"'.format(background_img["rel_path"]))
         return None
 
     im_out.save(img_bytes_io)
