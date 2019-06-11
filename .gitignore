@@ -1,0 +1,12 @@
+# Remove token from Git
+src/bot/auth.py
+src/search/auth.py
+
+.idea/
+__pycache__/
+*.py[cod]
+*$py.class
+
+*.png
+*.jpeg
+*.jpg
