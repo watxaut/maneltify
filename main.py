@@ -11,11 +11,11 @@ logger = logging.getLogger('Adritify_bot')
 
 if __name__ == '__main__':
 
-    logger.info('--- Loading faces ---')
-    gimp.l_faces = gimp.load_face_params()
+    logger.info('--- Creating json file for faces ---')
+    gimp.create_face_params()
 
-    logger.info('--- Loading backgrounds ---')
-    gimp.l_backgrounds = gimp.load_background_params()
+    logger.info('--- Creating json file for backgrounds ---')
+    gimp.create_background_params()
 
     # telegram bot init
     updater = Updater(token=token)
@@ -30,5 +30,5 @@ if __name__ == '__main__':
     logger.info('--- Starting bot ---')
 
     # starts receiving calls
-    updater.start_polling()
+    updater.start_polling(timeout=10)
     updater.idle()

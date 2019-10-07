@@ -1,15 +1,20 @@
-from io import BytesIO
-from PIL import Image
-import os
+import json
+import logging
 import random
+import time
+from io import BytesIO
 
 import src.gimp.gimp as gimp
 import src.search.google as google
 
-
-import logging
-
 logger = logging.getLogger('Adritify_bot')
+
+
+def load_json_params(json_path):
+    f = open(json_path, "r")
+    l_params = json.load(f)
+    f.close()
+    return l_params
 
 
 def start(bot, update):
@@ -43,12 +48,19 @@ def lucky(bot, update):
             chat_id=update.message.chat_id,
             text="I need some input after the command bro"
         )
+        return None
+
+    # delete image
+    img_bytes_io.close()
+    img_bytes_io = None
 
 
 def montage(bot, update):
     logger.info('He recibido un comando tothemoon')
 
-    background_img_params = gimp.l_backgrounds[random.randint(0, len(gimp.l_backgrounds) - 1)]
+    # load json file for backgrounds and get one image params
+    l_backgrounds = load_json_params(gimp.JSON_BACKGROUNDS_PATH)
+    background_img_params = l_backgrounds[random.randint(0, len(l_backgrounds) - 1)]
 
     s_request = update.message.text.strip()
     if "onlyface" in s_request:
@@ -65,14 +77,20 @@ def montage(bot, update):
     else:
         bot.send_photo(update.message.chat_id, photo=img_bytes_io)
 
+    # delete image
+    img_bytes_io.close()
+    img_bytes_io = None
+
 
 def create_montage(background_img, only_face=False):
+    # load json file for faces and get one image params
+    l_faces = load_json_params(gimp.JSON_FACES_PATH)
 
     img_bytes_io = BytesIO()
-    img_bytes_io.name = 'montageohlala.jpeg'
+    img_bytes_io.name = "i_{}.jpeg".format(str(time.time()).replace(".", "_"))
 
     try:
-        im_out = gimp.adritify(background_img, gimp.l_faces, only_face)
+        im_out = gimp.adritify(background_img, l_faces, only_face)
     except:  # something wrong with the image jej
         logger.error('Something wrong with image: "{}"'.format(background_img["rel_path"]))
         return None

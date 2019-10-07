@@ -1,26 +1,30 @@
 import face_recognition
 from PIL import Image
 import os
+import json
 import random
 
 import logging
 
 logger = logging.getLogger('Adritify_bot')
 
+JSON_FACES_PATH = "src/gimp/faces.json"
+JSON_BACKGROUNDS_PATH = "src/gimp/backgrounds.json"
 
-def load_face_params():
+
+def create_face_params(json_save_path=JSON_FACES_PATH, background_path="resources/in/faces"):
     """
-    Loads all faces in 'resources/in/faces', calculates their bounding box and puts the bb and the path into a list
-    :return: list of dictionaries of {bb, path}
+    Loads all faces in 'background_path', calculates their bounding box and puts the bb and the path into a list
+    :return: json file path of the params
     """
 
     l_img = []
-    l_name_img = os.listdir("resources/in/faces")
+    l_name_img = os.listdir(background_path)
     for s_name in l_name_img:
 
         # get rid of tests and .md files
         if not s_name.startswith("_") and not s_name.endswith(".md"):
-            im_face_path = "resources/in/faces/{}".format(s_name)
+            im_face_path = "{}/{}".format(background_path, s_name)
             im_face = face_recognition.load_image_file(im_face_path)
             l_faces = face_recognition.face_locations(im_face)
 
@@ -33,14 +37,21 @@ def load_face_params():
                     "Image '{}' has no face :( Try to make the frame a little bigger without resizing the face".format(
                         s_name)
                 )
-    return l_img
+
+    # save list of params
+    json_img = json.dumps(l_img)
+
+    f = open(json_save_path, "w")
+    f.write(json_img)
+    f.close()
+    return json_save_path
 
 
-def load_background_params(background_path="resources/in/backgrounds"):
+def create_background_params(json_save_path=JSON_BACKGROUNDS_PATH, background_path="resources/in/backgrounds"):
     """
     Loads all backgrounds in 'resources/in/backgrounds', gets all faces, calculates their bounding box and puts the bbs
     and the path into a list.
-    :return: list of dictionaries of {[bb], path}
+    :return: file path of the json file
     """
 
     l_img = []
@@ -58,7 +69,14 @@ def load_background_params(background_path="resources/in/backgrounds"):
                 l_img.append({"rel_path": im_background_path, "l_faces": l_faces})
             else:
                 logger.info("No face found in image: '{}' :(".format(s_name))
-    return l_img
+
+    # save list of params
+    json_img = json.dumps(l_img)
+
+    f = open(json_save_path, "w")
+    f.write(json_img)
+    f.close()
+    return json_save_path
 
 
 def check_return_png_path(im_path, root_folder='resources/in/backgrounds'):
