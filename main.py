@@ -1,34 +1,55 @@
-from telegram.ext import Updater, CommandHandler
-from src.bot.auth import token
-from src.bot.bot import start, montage
-import src.gimp.gimp as gimp
-
+import argparse
 import logging
 
+from telegram.ext import Updater, MessageHandler, filters
+
+import src.bot as bot
+import src.config as config
+import src.gimp as gimp
+
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
-logger = logging.getLogger('Adritify_bot')
+logger = logging.getLogger(__name__)
 
 
 if __name__ == '__main__':
 
-    logger.info('--- Creating json file for faces ---')
-    gimp.create_face_params()
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        action="store_true",
+        help="Prints debug information about the execution (only for testing)"
+    )
 
-    logger.info('--- Creating json file for backgrounds ---')
-    gimp.create_background_params()
+    parser.add_argument(
+        "-f",
+        "--faces",
+        action="store_true",
+        help="Only computes faces and creates json"
+    )
 
-    # telegram bot init
-    updater = Updater(token=token)
-    dispatcher = updater.dispatcher
+    args = parser.parse_args()
+    if args.verbose:
+        logger.setLevel(logging.DEBUG)
+    else:
+        logger.setLevel(logging.INFO)
 
-    # adds the functions to the bot
-    dispatcher.add_handler(CommandHandler('start', start))
-    dispatcher.add_handler(CommandHandler('tothemoon', montage))
-    # dispatcher.add_handler(CommandHandler('imfeelinglucky', lucky))
-    dispatcher.add_handler(CommandHandler('onlyfacepls', montage))
+    if args.faces:
+        logger.info('--- Creating json file for faces ---')
+        json_face_path = r"faces.json"
+        imgs_face_path = r"resources/in/faces/manel"
+        gimp.create_face_params(json_face_path, imgs_face_path)
+    else:
+        # logger.info('--- Creating json file for backgrounds ---')
+        # gimp.create_background_params()
 
-    logger.info('--- Starting bot ---')
+        # telegram bot init
+        updater = Updater(token=config.TOKEN)
 
-    # starts receiving calls
-    updater.start_polling(timeout=10)
-    updater.idle()
+        updater.dispatcher.add_handler(MessageHandler(filters.Filters.all, bot.input_received))
+
+        logger.info('--- Init telegram bot ---')
+        updater.start_polling()
+        updater.idle()
+
+        # dispatcher.add_handler(CommandHandler('start', start))

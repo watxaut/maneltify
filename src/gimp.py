@@ -1,30 +1,28 @@
-import face_recognition
-from PIL import Image
-import os
 import json
+import logging
+import os
 import random
 
-import logging
+import face_recognition
+from PIL import Image
+import urllib.request as url
 
-logger = logging.getLogger('Adritify_bot')
-
-JSON_FACES_PATH = "src/gimp/faces.json"
-JSON_BACKGROUNDS_PATH = "src/gimp/backgrounds.json"
+logger = logging.getLogger(__name__)
 
 
-def create_face_params(json_save_path=JSON_FACES_PATH, background_path="resources/in/faces"):
+def create_face_params(json_save_path, imgs_face_path):
     """
     Loads all faces in 'background_path', calculates their bounding box and puts the bb and the path into a list
     :return: json file path of the params
     """
 
     l_img = []
-    l_name_img = os.listdir(background_path)
+    l_name_img = os.listdir(imgs_face_path)
     for s_name in l_name_img:
 
         # get rid of tests and .md files
         if not s_name.startswith("_") and not s_name.endswith(".md"):
-            im_face_path = "{}/{}".format(background_path, s_name)
+            im_face_path = "{}/{}".format(imgs_face_path, s_name)
             im_face = face_recognition.load_image_file(im_face_path)
             l_faces = face_recognition.face_locations(im_face)
 
@@ -47,7 +45,7 @@ def create_face_params(json_save_path=JSON_FACES_PATH, background_path="resource
     return json_save_path
 
 
-def create_background_params(json_save_path=JSON_BACKGROUNDS_PATH, background_path="resources/in/backgrounds"):
+def create_background_params(json_save_path, background_path):
     """
     Loads all backgrounds in 'resources/in/backgrounds', gets all faces, calculates their bounding box and puts the bbs
     and the path into a list.
@@ -79,7 +77,7 @@ def create_background_params(json_save_path=JSON_BACKGROUNDS_PATH, background_pa
     return json_save_path
 
 
-def check_return_png_path(im_path, root_folder='resources/in/backgrounds'):
+def check_return_png_path(im_path, root_folder):
     """
     Checks the image is in png and if not, converts it to png, saves it in the same folder and returns the new im path.
     If it is, returns the same path
@@ -101,7 +99,7 @@ def check_return_png_path(im_path, root_folder='resources/in/backgrounds'):
         return im_path
 
 
-def adritify(background_img, l_img_faces, only_face):
+def manelitify(background_img, l_img_faces, only_face, root_folder):
     """
     The function that makes the magic. Gets an image background path, the list of faces {bb, path} and crops, resizes
     and pastes the faces into the image.
@@ -109,20 +107,22 @@ def adritify(background_img, l_img_faces, only_face):
     {rel_path, l_faces}
     :param l_img_faces: list of dictionaries {bb, path} of each face
     :param only_face: param that crops (or not) the face
+    :param root_folder:
     :return: the PIL background image
     """
 
     if type(background_img) is dict:
         im_path = background_img["rel_path"]
-        im_path_new = check_return_png_path(im_path)
+        im_path_new = check_return_png_path(im_path, root_folder)
 
         l_faces = background_img["l_faces"]
     else:
         im_path = background_img
 
-        im_path_new = check_return_png_path(im_path)                # check background image png format
+        im_path_new = check_return_png_path(im_path, root_folder)  # check background image png format
         im_base = face_recognition.load_image_file(im_path_new)     # load face_recognition PIL background image
         l_faces = face_recognition.face_locations(im_base)          # get tuple with face locations
+        logger.info(f"Found '{len(l_faces)}' faces")
 
     # reload images again because yes (I was having problems with that method so I opened it again using PIL)
     im_base = Image.open(im_path_new)

@@ -10,6 +10,10 @@ __pycache__/
 *$py.class
 
 venv/
+.env
+faces.json
+backgrounds.json
+tmp/
 
 # Created by https://www.gitignore.io/api/python,pycharm
 # Edit at https://www.gitignore.io/?templates=python,pycharm
